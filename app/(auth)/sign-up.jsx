@@ -1,20 +1,32 @@
-import { ScrollView, Text, View, Image } from "react-native";
+import { ScrollView, Text, View, Image, Alert } from "react-native";
 import React, { useState } from "react";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
 import FormField from "../components/FormField";
 import CustomButton from "../components/CustomButton";
+import { createUser } from "../../lib/appwrite";
 
 const SignUp = () => {
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
   const [isSubmitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
 
-  const submit = () => {};
+  const submit = async () => {
+    if (form.username === "" || form.email === "" || form.password === "") {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await createUser(form.email, form.password, form.username);
+      console.log(result);
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView className="h-full bg-primary">
@@ -53,7 +65,7 @@ const SignUp = () => {
             title={"Sign Up"}
             containerStyles={"mt-7"}
             isLoading={isSubmitting}
-            handleSubmit={submit}
+            handlePress={submit}
           />
           <View className="flex flex-row justify-center gap-2 pt-5">
             <Text className="text-lg text-gray-100 font-pregular">
